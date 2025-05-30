@@ -48,7 +48,7 @@ tackling-fake-news/
 ### 1. Clone the Repository
 
 ```bash
-git clone https://github.com/your-username/tackling-fake-news.git
+git clone https://github.com/kaminei01/tackling-fake-news.git
 cd tackling-fake-news
 ```
 
