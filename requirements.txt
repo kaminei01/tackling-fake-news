@@ -1,9 +1,0 @@
-fastapi
-uvicorn[standard]
-pymongo
-python-dotenv
-transformers
-torch
-scikit-learn
-python-socketio
-aiohttp
