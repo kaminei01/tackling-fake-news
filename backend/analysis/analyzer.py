@@ -7,7 +7,7 @@ def analyze_text(text):
     confidence = result["confidence"]
 
     # Dynamic reason based on verdict + confidence
-    if verdict == "Fake":
+    if verdict == "FAKE":
         if confidence > 0.9:
             reason = "Highly confident in detecting fake content due to misleading language patterns."
         elif confidence > 0.7:
