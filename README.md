@@ -63,7 +63,7 @@ pip install -r requirements.txt
 ⚠️ Important: The model files are too large to store on GitHub.
 Instead, download the model files from the link below:
 
-📦 Model Downloadhttps://drive.google.com/drive/folders/15unIJtJJoYP6RWMg6v9XFNMQjO1t3bWN?usp=sharing
+📦 Model Download: https://drive.google.com/drive/folders/15unIJtJJoYP6RWMg6v9XFNMQjO1t3bWN?usp=sharing
 
 
 After downloading:
