@@ -60,6 +60,16 @@ python -m venv venv
 venv\Scripts\activate      # On Windows
 pip install -r requirements.txt
 ```
+⚠️ Important: The model files are too large to store on GitHub.
+Instead, download the model files from the link below:
+
+📦 Model Downloadhttps://drive.google.com/drive/folders/15unIJtJJoYP6RWMg6v9XFNMQjO1t3bWN?usp=sharing
+
+
+After downloading:
+- Extract the files (if zipped)
+- Place the extracted folder inside:
+  backend/models/model_output/checkpoint-634/
 
 Make sure MongoDB is running locally on `localhost:27017`.
 
@@ -98,21 +108,6 @@ Users can submit feedback from the `/feedback` page. All feedback gets stored in
 -  Model retraining with active learning
 
 ---
-##📘 Download Pretrained Roberta Model
-Due to GitHub file size limitations, the full Roberta fine-tuned model is hosted on Google Drive.
-You can download it using the link below and place it in the appropriate folder:
-📁 Drive Link to Model
-👉 Download Roberta Model: https://drive.google.com/drive/folders/15unIJtJJoYP6RWMg6v9XFNMQjO1t3bWN?usp=sharing
-After downloading, extract the folder and move it to:
-backend/models/model_output/checkpoint-634/
-backend/
-├── models/
-│   └── model_output/
-│       └── checkpoint-634/
-│           ├── config.json
-│           ├── pytorch_model.bin
-│           ├── tokenizer_config.json
-│           ├── vocab.txt
-│           └── ... (other files)
+
 
 
