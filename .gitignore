@@ -19,5 +19,4 @@ dist/
 # VS Code
 .vscode/
 # Ignore model files
-backend/models/Fake-News-Bert-Detect/*
-!backend/models/Fake-News-Bert-Detect/README.md
+backend/models/Fake-News-Bert-Detect
