@@ -41,6 +41,22 @@ KNOWN_REAL_CLAIMS = [
     "india successfully lands chandrayaan-3 near moon's south pole"
 ]
 
+def dynamic_reason(verdict, confidence):
+    if verdict == "FAKE":
+        if confidence > 0.9:
+            return "Highly confident in detecting fake content due to misleading language patterns."
+        elif confidence > 0.7:
+            return "Likely fake; content shows signs of manipulation or exaggeration."
+        else:
+            return "Possibly fake, but evidence is limited or unclear."
+    else:  # Real
+        if confidence > 0.9:
+            return "Strong indications of authenticity from credible patterns."
+        elif confidence > 0.7:
+            return "Seems real but cross-verification is suggested."
+        else:
+            return "Likely real, but confidence is moderate."
+
 def is_absurd(text):
     text_lower = text.lower()
     return any(phrase in text_lower for phrase in ABSURD_PHRASES)
@@ -160,7 +176,7 @@ def analyze_text(text, debug=False):
     return {
         "verdict": verdict,
         "confidence": round(score, 4),
-        "reason": result.get("reason", "Model-based classification."),
+        "reason": result.get("reason", dynamic_reason(verdict, score)),
         "source_type": result.get("source_type", "ml"),
         "tags": ["auto-verified"],
         "sources": sources or []

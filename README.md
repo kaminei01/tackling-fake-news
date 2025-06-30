@@ -1,4 +1,3 @@
-
 #  Tackling Fake News – Real-time Detection Web App
 
 A full-stack web application that detects fake news using a fine-tuned transformer model. Users can analyze claims, view results, and submit feedback — all in real time.
@@ -60,6 +59,25 @@ python -m venv venv
 venv\Scripts\activate      # On Windows
 pip install -r requirements.txt
 ```
+⚠️ **Important:** The model files are too large to store on GitHub.
+
+Instead, download the model files from the link below:
+
+📦 **Model Download:** https://drive.google.com/drive/folders/18lm2d3k9htXQ5z89qI9OvY-hwZSCPRO6?usp=drive_link
+
+After downloading:
+- Extract the files (if zipped)
+- Place the extracted folder inside:
+  ```
+  backend/models/Fake-News-Bert-Detect/
+  ```
+
+**Update the Model Path:**  
+Open `backend/models/roberta_model.py` and update the model path variable to match the new location. For example:
+
+```python
+model_path = "backend/models/Fake-News-Bert-Detect"
+```
 
 Make sure MongoDB is running locally on `localhost:27017`.
 
@@ -98,5 +116,3 @@ Users can submit feedback from the `/feedback` page. All feedback gets stored in
 -  Model retraining with active learning
 
 ---
-
-
