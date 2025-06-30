@@ -1,0 +1,18 @@
+[
+  {
+    "text": "india successfully landed chandrayaan-3 on the moon's south pole in 2023.",
+    "verdict": "REAL",
+    "confidence": 0.99,
+    "reason": "Verified by ISRO and international agencies.",
+    "source_type": "trusted-fact",
+    "tags": ["ISRO", "moon", "India", "space"],
+    "sources": [
+      {
+        "title": "ISRO Chandrayaan-3 Moon Landing",
+        "url": "https://www.isro.gov.in/Chandrayaan3.html",
+        "source": "ISRO",
+        "description": "Official ISRO announcement of Chandrayaan-3's successful landing."
+      }
+    ]
+  }
+]
