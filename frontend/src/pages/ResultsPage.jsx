@@ -7,6 +7,8 @@ import {
   Card,
   CardContent,
   Chip,
+  Box,
+  Slide,
 } from "@mui/material";
 import StatsChart from "../components/StatsChart";
 
@@ -15,24 +17,24 @@ export default function ResultsPage() {
   const [stats, setStats] = useState({ fake: 0, real: 0 });
   const socketRef = useRef(null);
 
-  // Initial fetch
+  // Helper for color based on confidence
+  const getConfidenceColor = (conf) => {
+    if (conf >= 0.8) return "green";
+    if (conf >= 0.5) return "orange";
+    return "red";
+  };
+
   useEffect(() => {
     fetch("http://localhost:8000/recent-results")
       .then((res) => res.json())
       .then((data) => {
         setResults(data);
-
-        const fakeCount = data.filter(
-          (item) => item.verdict?.verdict === "FAKE"
-        ).length;
-        const realCount = data.filter(
-          (item) => item.verdict?.verdict === "REAL"
-        ).length;
+        const fakeCount = data.filter((item) => item.verdict === "FAKE").length;
+        const realCount = data.filter((item) => item.verdict === "REAL").length;
         setStats({ fake: fakeCount, real: realCount });
       });
   }, []);
 
-  // Setup Socket.IO
   useEffect(() => {
     socketRef.current = io("http://localhost:8000");
 
@@ -44,7 +46,7 @@ export default function ResultsPage() {
       console.log("New result received:", data);
       setResults((prev) => [data, ...prev]);
 
-      const verdictKey = data.verdict?.verdict?.toLowerCase();
+      const verdictKey = data.verdict?.toLowerCase();
       if (verdictKey === "fake" || verdictKey === "real") {
         setStats((prev) => ({
           ...prev,
@@ -65,46 +67,82 @@ export default function ResultsPage() {
   }, []);
 
   return (
-    <Container maxWidth="lg" sx={{ mt: 5 }}>
-      <Typography variant="h4" gutterBottom>
-        Recent Fake News Analysis
+    <Container maxWidth="lg" sx={{ mt: 5, mb: 10 }}>
+      <Typography variant="h4" gutterBottom align="center" fontWeight="bold">
+        Real-Time Fake News Detection Results
       </Typography>
 
       <StatsChart stats={stats} />
 
-      <Grid container spacing={3}>
-        {results.map((item, index) => (
-          <Grid item xs={12} md={6} key={index}>
-            <Card>
-              <CardContent>
-                <Typography variant="h6">Claim</Typography>
-                <Typography>{item.claim}</Typography>
+      <Grid container spacing={3} sx={{ mt: 3 }}>
+        {results.length === 0 ? (
+          <Typography variant="body1" color="textSecondary" sx={{ m: 3 }}>
+            No analysis results yet. Start analyzing articles to see them here.
+          </Typography>
+        ) : (
+          results.map((item, index) => (
+            <Grid item xs={12} md={6} key={index}>
+              <Slide direction="up" in timeout={400}>
+                <Card
+                  sx={{
+                    borderLeft: `6px solid ${item.verdict === "FAKE" ? "#d32f2f" : "#388e3c"}`,
+                    backgroundColor: "#fdfdfd",
+                  }}
+                >
+                  <CardContent>
+                    <Typography variant="h6" sx={{ mb: 1 }}>
+                      Claim:
+                    </Typography>
+                    <Typography variant="body1" color="text.primary" sx={{ mb: 2 }}>
+                      {typeof item.claim === "string" ? item.claim : JSON.stringify(item.claim)}
+                    </Typography>
 
-                <Typography variant="h6" sx={{ mt: 2 }}>
-                  Verdict
-                </Typography>
-                <Chip
-                  label={item.verdict?.verdict}
-                  color={
-                    item.verdict?.verdict === "FAKE" ? "error" : "success"
-                  }
-                />
+                    <Typography variant="h6">Verdict:</Typography>
+                    <Chip
+                      label={item.verdict}
+                      color={item.verdict === "FAKE" ? "error" : "success"}
+                      variant="outlined"
+                      sx={{ mt: 1, mb: 2 }}
+                    />
 
-                {item.verdict?.confidence !== undefined && (
-                  <Typography sx={{ mt: 1 }}>
-                    Confidence: {Math.round(item.verdict.confidence * 100)}%
-                  </Typography>
-                )}
+                    <Typography variant="body2" sx={{ mb: 1 }}>
+                      Confidence:{" "}
+                      <strong style={{ color: getConfidenceColor(item.confidence) }}>
+                        {(item.confidence * 100).toFixed(2)}%
+                      </strong>
+                    </Typography>
 
-                {item.reason && (
-                  <Typography sx={{ mt: 1 }}>
-                    Reason: {item.reason}
-                  </Typography>
-                )}
-              </CardContent>
-            </Card>
-          </Grid>
-        ))}
+                    {item.reason && (
+                      <Typography variant="body2" sx={{ mb: 1 }}>
+                        <strong>Reason:</strong> {item.reason}
+                      </Typography>
+                    )}
+
+                    {item.source_type && (
+                      <Typography variant="body2" sx={{ mb: 1 }}>
+                        <strong>Source Type:</strong> {item.source_type}
+                      </Typography>
+                    )}
+
+                    {Array.isArray(item.tags) && item.tags.length > 0 && (
+                      <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1, mt: 1 }}>
+                        {item.tags.map((tag, idx) => (
+                          <Chip
+                            key={idx}
+                            label={`#${tag}`}
+                            size="small"
+                            color="primary"
+                            variant="outlined"
+                          />
+                        ))}
+                      </Box>
+                    )}
+                  </CardContent>
+                </Card>
+              </Slide>
+            </Grid>
+          ))
+        )}
       </Grid>
     </Container>
   );

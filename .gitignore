@@ -16,14 +16,5 @@ dist/
 .DS_Store
 .env
 
-# Model files and data (to avoid GitHub push issues)
-backend/models/model_output/
-backend/models/*.pt
-backend/models/*.bin
-backend/models/*.csv
-*.h5
-*.log
-*.ckpt
-
 # VS Code
 .vscode/

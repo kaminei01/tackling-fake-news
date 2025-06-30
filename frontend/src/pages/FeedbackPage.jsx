@@ -1,91 +1,109 @@
-import React, { useState } from 'react';
+import React, { useState } from "react";
+import {
+  Container,
+  TextField,
+  Button,
+  Typography,
+  Alert,
+  CircularProgress,
+  Box,
+} from "@mui/material";
 
 const Feedback = () => {
   const [formData, setFormData] = useState({
-    name: '',
-    email: '',
-    message: '',
+    name: "",
+    email: "",
+    message: "",
   });
 
   const [status, setStatus] = useState(null); // null, 'sending', 'success', 'error'
 
   const handleChange = (e) => {
-    setFormData(prev => ({ ...prev, [e.target.name]: e.target.value }));
+    setFormData((prev) => ({ ...prev, [e.target.name]: e.target.value }));
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setStatus('sending');
+    setStatus("sending");
 
     try {
-      // Replace with your actual feedback API endpoint
-      const response = await fetch('/api/feedback', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+      const response = await fetch("http://localhost:8000/feedback", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(formData),
       });
 
       if (response.ok) {
-        setStatus('success');
-        setFormData({ name: '', email: '', message: '' });
+        setStatus("success");
+        setFormData({ name: "", email: "", message: "" });
       } else {
-        throw new Error('Failed to submit');
+        throw new Error("Failed to submit feedback");
       }
     } catch (error) {
-      setStatus('error');
+      console.error("Feedback Error:", error);
+      setStatus("error");
     }
   };
 
   return (
-    <div style={{ maxWidth: 500, margin: 'auto', padding: 20 }}>
-      <h2>Feedback</h2>
-      <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-        <input
-          type="text"
+    <Container maxWidth="sm" sx={{ mt: 5 }}>
+      <Typography variant="h4" gutterBottom>
+        Feedback
+      </Typography>
+      <form onSubmit={handleSubmit}>
+        <TextField
+          label="Your Name"
           name="name"
-          placeholder="Your Name"
           value={formData.name}
           onChange={handleChange}
+          fullWidth
           required
-          style={{ padding: 8, borderRadius: 4, border: '1px solid #ccc' }}
+          sx={{ mb: 2 }}
         />
-        <input
-          type="email"
+        <TextField
+          label="Your Email"
           name="email"
-          placeholder="Your Email"
+          type="email"
           value={formData.email}
           onChange={handleChange}
+          fullWidth
           required
-          style={{ padding: 8, borderRadius: 4, border: '1px solid #ccc' }}
+          sx={{ mb: 2 }}
         />
-        <textarea
+        <TextField
+          label="Your Feedback"
           name="message"
-          placeholder="Your Feedback"
           value={formData.message}
           onChange={handleChange}
+          fullWidth
           required
+          multiline
           rows={4}
-          style={{ padding: 8, borderRadius: 4, border: '1px solid #ccc', resize: 'vertical' }}
+          sx={{ mb: 2 }}
         />
-        <button
-          type="submit"
-          disabled={status === 'sending'}
-          style={{
-            padding: '10px',
-            borderRadius: 4,
-            border: 'none',
-            backgroundColor: '#007bff',
-            color: 'white',
-            cursor: status === 'sending' ? 'not-allowed' : 'pointer',
-          }}
-        >
-          {status === 'sending' ? 'Sending...' : 'Submit'}
-        </button>
+        <Box display="flex" alignItems="center" gap={2}>
+          <Button
+            type="submit"
+            variant="contained"
+            disabled={status === "sending"}
+          >
+            {status === "sending" ? "Sending..." : "Submit"}
+          </Button>
+          {status === "sending" && <CircularProgress size={24} />}
+        </Box>
       </form>
 
-      {status === 'success' && <p style={{ color: 'green', marginTop: 10 }}>Thank you for your feedback!</p>}
-      {status === 'error' && <p style={{ color: 'red', marginTop: 10 }}>Something went wrong. Please try again.</p>}
-    </div>
+      {status === "success" && (
+        <Alert severity="success" sx={{ mt: 2 }}>
+          Thank you for your feedback!
+        </Alert>
+      )}
+      {status === "error" && (
+        <Alert severity="error" sx={{ mt: 2 }}>
+          Something went wrong. Please try again.
+        </Alert>
+      )}
+    </Container>
   );
 };
 
