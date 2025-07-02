@@ -37,8 +37,10 @@ ABSURD_PHRASES = [
     "bleach approved for covid", "bleach approved for coronavirus",
 ]
 
+# Add any known real claims you want to always return REAL for
 KNOWN_REAL_CLAIMS = [
     "india successfully lands chandrayaan-3 near moon's south pole",
+    "india successfully landed chandrayaan-3 near the moon's south pole",
     "nasa’s perseverance rover discovers organic molecules on mars",
     "world health organization declares covid-19 no longer a global emergency"
 ]
@@ -98,7 +100,7 @@ def analyze_text(text, debug=False):
             "sources": []
         }
 
-    # 3. Check for known real claims
+    # 3. Check for known real claims (add multiple variations for robustness)
     if normalized_text in KNOWN_REAL_CLAIMS:
         return {
             "verdict": "REAL",
@@ -164,27 +166,36 @@ def analyze_text(text, debug=False):
             "sources": trusted
         }
     elif total_count > 0:
-        confidence = min(0.3, total_count / 10)
+        # Fallback to ML model if only untrusted/unrelated sources found
+        ml_result = detector.predict(text)
+        score = float(ml_result.get("confidence", 0.0))
+        verdict = ml_result.get("verdict", "UNKNOWN")
+        if score < 0.3:
+            verdict = "UNCERTAIN"
         return {
-            "verdict": "UNKNOWN",
-            "confidence": round(confidence, 4),
-            "reason": "Found only untrusted or unrelated sources.",
-            "source_type": "web-search-untrusted",
-            "tags": ["web-sources"],
+            "verdict": verdict,
+            "confidence": round(score, 4),
+            "reason": (
+                "No trusted sources found on the web. "
+                f"ML model verdict: {verdict} (confidence: {int(score*100)}%). "
+                f"Model reason: {ml_result.get('reason', '')}"
+            ),
+            "source_type": ml_result.get("source_type", "ml"),
+            "tags": ["ml-fallback", "web-sources"],
             "sources": sources
         }
 
-    # 7. ML model fallback
-    result = detector.predict(text)
-    score = float(result.get("confidence", 0.0))
-    verdict = result.get("verdict", "UNKNOWN")
+    # 7. ML model fallback (if no sources at all)
+    ml_result = detector.predict(text)
+    score = float(ml_result.get("confidence", 0.0))
+    verdict = ml_result.get("verdict", "UNKNOWN")
     if score < 0.3:
         verdict = "UNCERTAIN"
     return {
         "verdict": verdict,
         "confidence": round(score, 4),
-        "reason": result.get("reason", dynamic_reason(verdict, score)),
-        "source_type": result.get("source_type", "ml"),
+        "reason": ml_result.get("reason", dynamic_reason(verdict, score)),
+        "source_type": ml_result.get("source_type", "ml"),
         "tags": ["auto-verified"],
-        "sources": sources or []
+        "sources": []
     }
