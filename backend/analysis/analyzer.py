@@ -9,8 +9,11 @@ detector = FakeNewsDetector()
 
 # Load known real/fake claims
 file_path = os.path.join(os.path.dirname(__file__), "known_facts.json")
-with open(file_path, "r", encoding="utf-8") as f:
-    known_facts = json.load(f)
+try:
+    with open(file_path, "r", encoding="utf-8") as f:
+        known_facts = json.load(f)
+except (FileNotFoundError, json.JSONDecodeError):
+    known_facts = []
 
 TRUSTED_DOMAINS = [
     "bbc.com", "reuters.com", "ndtv.com", "timesofindia.indiatimes.com",
@@ -29,7 +32,7 @@ ABSURD_PHRASES = [
     "chocolate-powered car", "aliens endorse bitcoin", "ice cream stops climate change",
     "oxygen ban", "government bans oxygen", "cows apply for id", "banana president",
     "eiffel tower will be relocated", "eiffel tower moved", "moon made of cheese",
-    "government to ban gravity", "earth is flat and proved by scientists","drinking bleach", "ingesting bleach", "bleach cure", 
+    "government to ban gravity", "earth is flat and proved by scientists", "drinking bleach", "ingesting bleach", "bleach cure", 
     "disinfectant as medicine", "bleach approved as cure",
     "bleach approved for covid", "bleach approved for coronavirus",
 ]
@@ -37,8 +40,7 @@ ABSURD_PHRASES = [
 KNOWN_REAL_CLAIMS = [
     "india successfully lands chandrayaan-3 near moon's south pole",
     "nasa’s perseverance rover discovers organic molecules on mars",
-    "world health organization declares covid-19 no longer a global emergency",
-    "india successfully lands chandrayaan-3 near moon's south pole"
+    "world health organization declares covid-19 no longer a global emergency"
 ]
 
 def dynamic_reason(verdict, confidence):
@@ -63,25 +65,25 @@ def is_absurd(text):
 
 def has_satire_source(sources):
     for s in sources:
-        if any(domain in s["url"] for domain in SATIRE_DOMAINS):
+        if any(domain in s.get("url", "") for domain in SATIRE_DOMAINS):
             return True
     return False
 
 def trusted_sources(sources):
-    return [s for s in sources if any(domain in s["url"] for domain in TRUSTED_DOMAINS)]
+    return [s for s in sources if any(domain in s.get("url", "") for domain in TRUSTED_DOMAINS)]
 
 def analyze_text(text, debug=False):
     normalized_text = text.strip().lower()
 
     # 1. Check known facts
     for fact in known_facts:
-        if normalized_text == fact["text"].strip().lower():
+        if normalized_text == fact.get("text", "").strip().lower():
             return {
-                "verdict": fact["verdict"],
-                "confidence": round(float(fact["confidence"]), 4),
-                "reason": fact["reason"],
-                "source_type": fact["source_type"],
-                "tags": fact["tags"],
+                "verdict": fact.get("verdict", "UNKNOWN"),
+                "confidence": round(float(fact.get("confidence", 0.0)), 4),
+                "reason": fact.get("reason", ""),
+                "source_type": fact.get("source_type", ""),
+                "tags": fact.get("tags", []),
                 "sources": fact.get("sources", [])
             }
 
@@ -119,7 +121,13 @@ def analyze_text(text, debug=False):
         }
 
     # 5. Web verification
-    sources = fetch_news_sources(text)
+    try:
+        sources = fetch_news_sources(text)
+    except Exception as e:
+        sources = []
+        if debug:
+            print(f"Web source fetch failed: {e}")
+
     if has_satire_source(sources):
         return {
             "verdict": "FAKE",
@@ -145,7 +153,7 @@ def analyze_text(text, debug=False):
             "tags": ["auto-verified", "trusted-sources"],
             "sources": trusted
         }
-    elif trusted_count == 1 or trusted_count == 2:
+    elif trusted_count in (1, 2):
         confidence = min(0.5, trusted_count / 4)
         return {
             "verdict": "POSSIBLY_REAL",
@@ -170,7 +178,6 @@ def analyze_text(text, debug=False):
     result = detector.predict(text)
     score = float(result.get("confidence", 0.0))
     verdict = result.get("verdict", "UNKNOWN")
-    # If model confidence is very low, call it UNCERTAIN
     if score < 0.3:
         verdict = "UNCERTAIN"
     return {
