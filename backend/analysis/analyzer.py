@@ -41,6 +41,8 @@ ABSURD_PHRASES = [
 KNOWN_REAL_CLAIMS = [
     "india successfully lands chandrayaan-3 near moon's south pole",
     "india successfully landed chandrayaan-3 near the moon's south pole",
+    "chandrayaan-3 landed on the moon's south pole",
+    "chandrayaan-3 successfully landed",
     "nasa’s perseverance rover discovers organic molecules on mars",
     "world health organization declares covid-19 no longer a global emergency"
 ]
@@ -101,7 +103,7 @@ def analyze_text(text, debug=False):
         }
 
     # 3. Check for known real claims (add multiple variations for robustness)
-    if normalized_text in KNOWN_REAL_CLAIMS:
+    if any(known_claim in normalized_text for known_claim in KNOWN_REAL_CLAIMS):
         return {
             "verdict": "REAL",
             "confidence": 1.0,
