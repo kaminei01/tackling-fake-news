@@ -1,10 +1,12 @@
 import os
 from transformers import AutoTokenizer, AutoModelForSequenceClassification, pipeline
 from pathlib import Path
+import logging
 
 class FakeNewsDetector:
-    def __init__(self, model_path=r"C:\Users\srava\OneDrive\Desktop\tackling-fake-news\backend\models\Fake-News-Bert-Detect"):
-        # Use raw string for Windows path to avoid escape issues, and convert for transformers
+    def __init__(self, model_path=None):
+        if model_path is None:
+            model_path = os.getenv("FAKE_NEWS_MODEL_PATH", "models/Fake-News-Bert-Detect")
         model_path = Path(model_path).resolve().as_posix()
 
         self.tokenizer = AutoTokenizer.from_pretrained(model_path, local_files_only=True)
@@ -32,9 +34,10 @@ class FakeNewsDetector:
                 "source_type": "ml"
             }
         except Exception as e:
+            logging.error(f"Model prediction failed: {str(e)}")
             return {
                 "verdict": "UNKNOWN",
                 "confidence": 0.0,
-                "reason": f"Model prediction failed: {str(e)}",
+                "reason": "Model prediction failed.",
                 "source_type": "ml"
             }
